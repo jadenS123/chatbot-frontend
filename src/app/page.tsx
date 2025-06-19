@@ -21,7 +21,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
+      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn more about him. To make our conversation a bit more personal, could you please tell me your name?",
       sender: 'bot'
     }
   ]);
