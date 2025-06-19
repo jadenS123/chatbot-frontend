@@ -10,24 +10,28 @@ type Message = {
   sender: 'user' | 'bot';
 };
 
-export default function Home() {
-  // Holds the array of all messages in the chat
-  const [messages, setMessages] = useState<Message[]>([]);
-  // Holds the text the user is currently typing in the input box
-  const [input, setInput] = useState('');
-  // A state to track if we are waiting for the bot's response
-  const [isLoading, setIsLoading] = useState(false);
+// A type to define the current stage of the conversation
+type ConversationStage = 'greeting' | 'chatting';
 
-  // A ref to an empty div at the bottom of the chat that we can scroll to
+export default function Home() {
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationStage, setConversationStage] = useState<ConversationStage>('greeting');
+  
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
+      sender: 'bot'
+    }
+  ]);
+
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  // This "effect" runs every single time the `messages` array changes.
-  // Its job is to smoothly scroll the chat to the bottom.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // This function handles the logic when the user clicks "Send"
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -41,52 +45,75 @@ export default function Home() {
     setMessages(prevMessages => [...prevMessages, userMessage]);
     const currentInput = input;
     setInput('');
-    setIsLoading(true);
 
-    // This helper function creates a delay for a specified time in milliseconds
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    if (conversationStage === 'greeting') {
+      const refusalKeywords = ['no', 'nah', 'skip', 'n/a', 'anon', 'anonymous', 'i prefer not to say', 'i\'d rather not'];
+      const isRefusal = refusalKeywords.includes(currentInput.trim().toLowerCase());
 
-    try {
-      const fetchPromise = fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: currentInput }),
-      });
-
-      // By waiting for both, we guarantee the loading indicator shows for at least 1 second.
-      const [response] = await Promise.all([fetchPromise, delay(1000)]);
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (isRefusal) {
+        // If the user says no, give a polite response and move on
+        const followupMessage: Message = {
+          id: Date.now() + 1,
+          text: "Okay, no problem. What would you like to know about Jaden?", // UPDATED TEXT
+          sender: 'bot',
+        };
+        setMessages(prevMessages => [...prevMessages, followupMessage]);
+        setConversationStage('chatting'); 
+      } else {
+        // Otherwise, treat the input as their name
+        const visitorName = currentInput;
+        const welcomeReply: Message = {
+          id: Date.now() + 1,
+          text: `It's great to meet you, ${visitorName}! What would you like to know about Jaden?`, // UPDATED TEXT
+          sender: 'bot',
+        };
+        setMessages(prevMessages => [...prevMessages, welcomeReply]);
+        setConversationStage('chatting');
       }
 
-      const data = await response.json();
-      const botMessage: Message = {
-        id: Date.now() + 1,
-        text: data.reply,
-        sender: 'bot',
-      };
-      setMessages(prevMessages => [...prevMessages, botMessage]);
+    } else { // 'chatting' stage
+      setIsLoading(true);
 
-    } catch (error) {
-      console.error("Failed to fetch response:", error);
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        text: "Sorry, I'm having trouble connecting. Please try again.",
-        sender: 'bot',
-      };
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
-    } finally {
-      setIsLoading(false);
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+      try {
+        const fetchPromise = fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: currentInput }),
+        });
+
+        const [response] = await Promise.all([fetchPromise, delay(1000)]);
+
+        if (!response.ok) { throw new Error('Network response was not ok'); }
+
+        const data = await response.json();
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          text: data.reply,
+          sender: 'bot',
+        };
+        setMessages(prevMessages => [...prevMessages, botMessage]);
+
+      } catch (error) {
+        console.error("Failed to fetch response:", error);
+        const errorMessage: Message = {
+          id: Date.now() + 1,
+          text: "Sorry, I'm having trouble connecting. Please try again.",
+          sender: 'bot',
+        };
+        setMessages(prevMessages => [...prevMessages, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-2xl flex flex-col h-[90vh] border rounded-lg shadow-lg bg-white">
-        
         <div className="flex-grow p-4 overflow-y-auto">
           {messages.map(message => (
             <div
@@ -95,11 +122,10 @@ export default function Home() {
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
               } mb-4`}
             >
-              {/* === IMPROVED HEADSHOT STYLING (Messages) === */}
               {message.sender === 'bot' && (
                 <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
                   <Image
-                    src="/Headshot.jpg" // Using the correct filename with capitalization
+                    src="/Headshot.jpg"
                     alt="Chatbot headshot"
                     width={40}
                     height={40}
@@ -107,7 +133,6 @@ export default function Home() {
                   />
                 </div>
               )}
-              
               <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${
                   message.sender === 'user'
@@ -122,10 +147,9 @@ export default function Home() {
 
           {isLoading && (
             <div className="flex items-start justify-start mb-4">
-               {/* === IMPROVED HEADSHOT STYLING (Typing Indicator) === */}
                <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
                   <Image
-                    src="/Headshot.jpg" // Using the correct filename with capitalization
+                    src="/Headshot.jpg"
                     alt="Chatbot headshot"
                     width={40}
                     height={40}
@@ -144,14 +168,16 @@ export default function Home() {
 
           <div ref={messagesEndRef} />
         </div>
-
         <div className="border-t border-gray-200"></div>
-
         <form onSubmit={handleSendMessage} className="p-4 flex items-center">
           <input
             type="text"
             className="flex-grow px-4 py-2 border rounded-full text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ask me anything..."
+            placeholder={
+              conversationStage === 'greeting' 
+                ? "Please enter your name..." 
+                : "Ask me anything..."
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
