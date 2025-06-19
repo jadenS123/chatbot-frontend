@@ -1,7 +1,8 @@
 'use client';
 
-// NEW: We've added useRef and useEffect for the new features
+// Imports for state, refs, effects, and the Image component
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 // This defines the structure for a single message object
 type Message = {
@@ -15,14 +16,13 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   // Holds the text the user is currently typing in the input box
   const [input, setInput] = useState('');
-  
-  // NEW: A state to track if we are waiting for the bot's response
+  // A state to track if we are waiting for the bot's response
   const [isLoading, setIsLoading] = useState(false);
 
-  // NEW: A reference to an empty div at the bottom of the chat that we can scroll to
+  // A ref to an empty div at the bottom of the chat that we can scroll to
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  // NEW: This "effect" runs every single time the `messages` array changes.
+  // This "effect" runs every single time the `messages` array changes.
   // Its job is to smoothly scroll the chat to the bottom.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,18 +42,22 @@ export default function Home() {
     setMessages(prevMessages => [...prevMessages, userMessage]);
     const currentInput = input;
     setInput('');
-
-    // NEW: Turn the typing indicator ON
     setIsLoading(true);
 
+    // This helper function creates a delay for a specified time in milliseconds
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     try {
-      const response = await fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
+      const fetchPromise = fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: currentInput }),
       });
+
+      // By waiting for both, we guarantee the loading indicator shows for at least 1 second.
+      const [response] = await Promise.all([fetchPromise, delay(1000)]);
 
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -76,7 +80,6 @@ export default function Home() {
       };
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
-      // NEW: Turn the typing indicator OFF after the request is complete (whether it succeeded or failed)
       setIsLoading(false);
     }
   };
@@ -85,19 +88,29 @@ export default function Home() {
     <main className="flex h-screen flex-col items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-2xl flex flex-col h-[90vh] border rounded-lg shadow-lg bg-white">
         
-        {/* This is the main chat window that scrolls */}
         <div className="flex-grow p-4 overflow-y-auto">
-          {/* We map over the messages array to display each message bubble */}
           {messages.map(message => (
             <div
               key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+              className={`flex items-start ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
+              } mb-4`}
             >
+              {message.sender === 'bot' && (
+                <Image
+                  src="/headshot.png" // This must match the filename in your /public folder
+                  alt="Chatbot headshot"
+                  width={40}
+                  height={40}
+                  className="rounded-full mr-3"
+                />
+              )}
+              
               <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${
                   message.sender === 'user'
-                    ? 'bg-blue-500 text-white' // User's bubble style
-                    : 'bg-gray-200 text-gray-800' // Bot's bubble style
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
                 }`}
               >
                 <p className="text-sm">{message.text}</p>
@@ -105,9 +118,15 @@ export default function Home() {
             </div>
           ))}
 
-          {/* NEW: Display the typing indicator only when isLoading is true */}
           {isLoading && (
             <div className="flex justify-start mb-4">
+               <Image
+                  src="/Headshot.jpg"
+                  alt="Chatbot headshot"
+                  width={40}
+                  height={40}
+                  className="rounded-full mr-3"
+                />
               <div className="bg-gray-200 text-gray-800 rounded-2xl px-4 py-2">
                 <div className="flex items-center justify-center space-x-1">
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
@@ -118,13 +137,11 @@ export default function Home() {
             </div>
           )}
 
-          {/* NEW: This is the invisible anchor for auto-scrolling */}
           <div ref={messagesEndRef} />
         </div>
 
         <div className="border-t border-gray-200"></div>
 
-        {/* This is the input form at the bottom */}
         <form onSubmit={handleSendMessage} className="p-4 flex items-center">
           <input
             type="text"
