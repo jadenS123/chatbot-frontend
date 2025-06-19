@@ -1,6 +1,5 @@
 'use client';
 
-// Imports for state, refs, effects, and the Image component
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
@@ -96,14 +95,17 @@ export default function Home() {
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
               } mb-4`}
             >
+              {/* === IMPROVED HEADSHOT STYLING (Messages) === */}
               {message.sender === 'bot' && (
-                <Image
-                  src="/headshot.png" // This must match the filename in your /public folder
-                  alt="Chatbot headshot"
-                  width={40}
-                  height={40}
-                  className="rounded-full mr-3"
-                />
+                <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
+                  <Image
+                    src="/Headshot.jpg" // Using the correct filename with capitalization
+                    alt="Chatbot headshot"
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
               )}
               
               <div
@@ -119,15 +121,18 @@ export default function Home() {
           ))}
 
           {isLoading && (
-            <div className="flex justify-start mb-4">
-               <Image
-                  src="/Headshot.jpg"
-                  alt="Chatbot headshot"
-                  width={40}
-                  height={40}
-                  className="rounded-full mr-3"
-                />
-              <div className="bg-gray-200 text-gray-800 rounded-2xl px-4 py-2">
+            <div className="flex items-start justify-start mb-4">
+               {/* === IMPROVED HEADSHOT STYLING (Typing Indicator) === */}
+               <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
+                  <Image
+                    src="/Headshot.jpg" // Using the correct filename with capitalization
+                    alt="Chatbot headshot"
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              <div className="bg-gray-200 text-gray-800 rounded-2xl px-4 py-2 flex items-center">
                 <div className="flex items-center justify-center space-x-1">
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
