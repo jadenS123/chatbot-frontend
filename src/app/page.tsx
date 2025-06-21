@@ -21,7 +21,8 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
+      // CORRECTED: Replaced ' with &apos;
+      text: "Hello and welcome! I&apos;m Jaden&apos;s AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
       sender: 'bot'
     }
   ]);
@@ -62,7 +63,8 @@ export default function Home() {
         const visitorName = currentInput;
         const welcomeReply: Message = {
           id: Date.now() + 1,
-          text: `It's great to meet you, ${visitorName}! What would you like to know about Jaden?`,
+          // CORRECTED: Replaced ' with &apos;
+          text: `It&apos;s great to meet you, ${visitorName}! What would you like to know about Jaden?`,
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, welcomeReply]);
@@ -97,7 +99,7 @@ export default function Home() {
         console.error("Failed to fetch response:", error);
         const errorMessage: Message = {
           id: Date.now() + 1,
-          text: "Sorry, I'm having trouble connecting. Please try again.",
+          text: "Sorry, I&apos;m having trouble connecting. Please try again.", // CORRECTED
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, errorMessage]);
@@ -108,23 +110,16 @@ export default function Home() {
   };
 
   return (
-    // UPDATED: Added a subtle gradient background
     <main className="flex h-screen flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 p-4">
       <div className="w-full max-w-2xl flex flex-col h-[90vh] border rounded-lg shadow-lg bg-white">
         
-        {/* NEW: Professional Header Section */}
         <div className="flex items-center p-4 border-b border-gray-200">
           <div className="w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0">
-            <Image
-              src="/Headshot.jpg"
-              alt="Chatbot headshot"
-              width={48}
-              height={48}
-              className="object-cover w-full h-full"
-            />
+            <Image src="/Headshot.jpg" alt="Chatbot headshot" width={48} height={48} className="object-cover w-full h-full" />
           </div>
           <div className="flex-grow">
-            <h2 className="font-bold text-lg text-gray-800">Jaden's AI Assistant</h2>
+            {/* CORRECTED: Replaced ' with &apos; */}
+            <h2 className="font-bold text-lg text-gray-800">Jaden&apos;s AI Assistant</h2>
             <div className="flex items-center space-x-2">
               <span className="h-2.5 w-2.5 bg-green-500 rounded-full animate-pulse"></span>
               <p className="text-sm text-gray-500">Online</p>
@@ -132,7 +127,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* This is the main chat window that scrolls */}
         <div className="flex-grow p-4 overflow-y-auto">
           {messages.map(message => (
             <div key={message.id} className={`flex items-start ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -164,7 +158,6 @@ export default function Home() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* This is the input form at the bottom */}
         <form onSubmit={handleSendMessage} className="p-4 flex items-center border-t border-gray-200">
           <input
             type="text"
