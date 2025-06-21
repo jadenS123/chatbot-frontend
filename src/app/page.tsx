@@ -21,8 +21,8 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      // CORRECTED: Replaced ' with &apos;
-      text: "Hello and welcome! I&apos;m Jaden&apos;s AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
+      // CORRECTED: Using curly apostrophes
+      text: "Hello and welcome! I’m Jaden’s AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
       sender: 'bot'
     }
   ]);
@@ -63,8 +63,8 @@ export default function Home() {
         const visitorName = currentInput;
         const welcomeReply: Message = {
           id: Date.now() + 1,
-          // CORRECTED: Replaced ' with &apos;
-          text: `It&apos;s great to meet you, ${visitorName}! What would you like to know about Jaden?`,
+          // CORRECTED: Using curly apostrophes
+          text: `It’s great to meet you, ${visitorName}! What would you like to know about Jaden?`,
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, welcomeReply]);
@@ -99,7 +99,8 @@ export default function Home() {
         console.error("Failed to fetch response:", error);
         const errorMessage: Message = {
           id: Date.now() + 1,
-          text: "Sorry, I&apos;m having trouble connecting. Please try again.", // CORRECTED
+          // CORRECTED: Using curly apostrophes
+          text: "Sorry, I’m having trouble connecting. Please try again.",
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, errorMessage]);
@@ -118,8 +119,8 @@ export default function Home() {
             <Image src="/Headshot.jpg" alt="Chatbot headshot" width={48} height={48} className="object-cover w-full h-full" />
           </div>
           <div className="flex-grow">
-            {/* CORRECTED: Replaced ' with &apos; */}
-            <h2 className="font-bold text-lg text-gray-800">Jaden&apos;s AI Assistant</h2>
+            {/* CORRECTED: Using curly apostrophes */}
+            <h2 className="font-bold text-lg text-gray-800">Jaden’s AI Assistant</h2>
             <div className="flex items-center space-x-2">
               <span className="h-2.5 w-2.5 bg-green-500 rounded-full animate-pulse"></span>
               <p className="text-sm text-gray-500">Online</p>
