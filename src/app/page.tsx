@@ -21,7 +21,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn more about him. To make our conversation a bit more personal, could you please tell me your name?",
+      text: "Hello and welcome! I'm Jaden's AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
       sender: 'bot'
     }
   ]);
@@ -51,20 +51,18 @@ export default function Home() {
       const isRefusal = refusalKeywords.includes(currentInput.trim().toLowerCase());
 
       if (isRefusal) {
-        // If the user says no, give a polite response and move on
         const followupMessage: Message = {
           id: Date.now() + 1,
-          text: "Okay, no problem. What would you like to know about Jaden?", // UPDATED TEXT
+          text: "Okay, no problem. What would you like to know about Jaden?",
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, followupMessage]);
         setConversationStage('chatting'); 
       } else {
-        // Otherwise, treat the input as their name
         const visitorName = currentInput;
         const welcomeReply: Message = {
           id: Date.now() + 1,
-          text: `It's great to meet you, ${visitorName}! What would you like to know about Jaden?`, // UPDATED TEXT
+          text: `It's great to meet you, ${visitorName}! What would you like to know about Jaden?`,
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, welcomeReply]);
@@ -79,9 +77,7 @@ export default function Home() {
       try {
         const fetchPromise = fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: currentInput }),
         });
 
@@ -112,34 +108,40 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center bg-gray-100 p-4">
+    // UPDATED: Added a subtle gradient background
+    <main className="flex h-screen flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 p-4">
       <div className="w-full max-w-2xl flex flex-col h-[90vh] border rounded-lg shadow-lg bg-white">
+        
+        {/* NEW: Professional Header Section */}
+        <div className="flex items-center p-4 border-b border-gray-200">
+          <div className="w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0">
+            <Image
+              src="/Headshot.jpg"
+              alt="Chatbot headshot"
+              width={48}
+              height={48}
+              className="object-cover w-full h-full"
+            />
+          </div>
+          <div className="flex-grow">
+            <h2 className="font-bold text-lg text-gray-800">Jaden's AI Assistant</h2>
+            <div className="flex items-center space-x-2">
+              <span className="h-2.5 w-2.5 bg-green-500 rounded-full animate-pulse"></span>
+              <p className="text-sm text-gray-500">Online</p>
+            </div>
+          </div>
+        </div>
+
+        {/* This is the main chat window that scrolls */}
         <div className="flex-grow p-4 overflow-y-auto">
           {messages.map(message => (
-            <div
-              key={message.id}
-              className={`flex items-start ${
-                message.sender === 'user' ? 'justify-end' : 'justify-start'
-              } mb-4`}
-            >
+            <div key={message.id} className={`flex items-start ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
               {message.sender === 'bot' && (
                 <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
-                  <Image
-                    src="/Headshot.jpg"
-                    alt="Chatbot headshot"
-                    width={40}
-                    height={40}
-                    className="object-cover w-full h-full"
-                  />
+                  <Image src="/Headshot.jpg" alt="Chatbot headshot" width={40} height={40} className="object-cover w-full h-full" />
                 </div>
               )}
-              <div
-                className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${
-                  message.sender === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                }`}
-              >
+              <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
                 <p className="text-sm">{message.text}</p>
               </div>
             </div>
@@ -148,13 +150,7 @@ export default function Home() {
           {isLoading && (
             <div className="flex items-start justify-start mb-4">
                <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
-                  <Image
-                    src="/Headshot.jpg"
-                    alt="Chatbot headshot"
-                    width={40}
-                    height={40}
-                    className="object-cover w-full h-full"
-                  />
+                  <Image src="/Headshot.jpg" alt="Chatbot headshot" width={40} height={40} className="object-cover w-full h-full" />
                 </div>
               <div className="bg-gray-200 text-gray-800 rounded-2xl px-4 py-2 flex items-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -165,19 +161,15 @@ export default function Home() {
               </div>
             </div>
           )}
-
           <div ref={messagesEndRef} />
         </div>
-        <div className="border-t border-gray-200"></div>
-        <form onSubmit={handleSendMessage} className="p-4 flex items-center">
+
+        {/* This is the input form at the bottom */}
+        <form onSubmit={handleSendMessage} className="p-4 flex items-center border-t border-gray-200">
           <input
             type="text"
             className="flex-grow px-4 py-2 border rounded-full text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={
-              conversationStage === 'greeting' 
-                ? "Please enter your name..." 
-                : "Ask me anything..."
-            }
+            placeholder={conversationStage === 'greeting' ? "Please enter your name..." : "Ask me anything..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
