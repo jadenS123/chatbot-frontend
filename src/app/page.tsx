@@ -20,14 +20,34 @@ const GREETING_MESSAGE: Message = {
   sender: 'bot'
 };
 
+// This function takes a string of text and returns React elements.
+// It finds any URLs and replaces them with clickable links.
+const renderMessageWithLinks = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank" // Opens the link in a new tab
+          rel="noopener noreferrer" // Important for security
+          className="text-blue-600 font-semibold hover:underline"
+        >
+          Click here to view/download
+        </a>
+      );
+    }
+    return part;
+  });
+};
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- START: PERSISTENCE LOGIC ---
-
-  // 1. LOAD conversationStage from localStorage on initial render
   const [conversationStage, setConversationStage] = useState<ConversationStage>(() => {
     if (typeof window !== 'undefined') {
       const savedStage = localStorage.getItem('conversation_stage') as ConversationStage | null;
@@ -36,28 +56,21 @@ export default function Home() {
     return 'greeting';
   });
 
-  // 2. LOAD messages from localStorage on initial render
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window !== 'undefined') {
       const savedMessages = localStorage.getItem('chat_history');
-      // If messages are found, parse them. Otherwise, return the default greeting.
       return savedMessages ? JSON.parse(savedMessages) : [GREETING_MESSAGE];
     }
     return [GREETING_MESSAGE];
   });
 
-  // 3. SAVE conversationStage to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('conversation_stage', conversationStage);
   }, [conversationStage]);
 
-  // 4. SAVE messages to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('chat_history', JSON.stringify(messages));
   }, [messages]);
-
-  // --- END: PERSISTENCE LOGIC ---
-
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -65,16 +78,11 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-
-  // --- NEW ---
-  // This function resets the chat to its initial state.
   const handleRestart = () => {
     setMessages([GREETING_MESSAGE]);
     setConversationStage('greeting');
-    setInput(''); // Also clear the input field
+    setInput('');
   };
-  // --- END NEW ---
-
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,8 +175,6 @@ export default function Home() {
             </div>
           </div>
           
-          {/* --- NEW --- */}
-          {/* Restart button with an SVG icon */}
           <button 
             onClick={handleRestart} 
             className="ml-auto p-2 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
@@ -178,7 +184,6 @@ export default function Home() {
               <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
             </svg>
           </button>
-          {/* --- END NEW --- */}
 
         </div>
 
@@ -191,7 +196,11 @@ export default function Home() {
                 </div>
               )}
               <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                <p className="text-sm">{message.text}</p>
+                
+                {/* --- MODIFIED LINE --- */}
+                {/* Instead of rendering message.text directly, we pass it to our new function */}
+                <p className="text-sm">{renderMessageWithLinks(message.text)}</p>
+
               </div>
             </div>
           ))}
