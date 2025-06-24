@@ -1,38 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jaden's AI Portfolio Chatbot
 
-## Getting Started
+**Live Demo:** [Click here to view the live chatbot!](https://askjaden.dev/) ## Description
 
-First, run the development server:
+This is a full-stack web application featuring a personalized AI chatbot that serves as my interactive resume. Recruiters and other visitors can engage in a natural language conversation to ask questions about my skills, projects, experience, and education. The chat history persists across page reloads for a seamless user experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This project was built to demonstrate proficiency in full-stack development, modern frontend frameworks, AI model integration, and creating a polished, user-centric application.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This is a full-stack project built with a separate frontend and backend.
 
-## Learn More
+* **Frontend Repository (You are here):** [https://github.com/JadenSulaiman/chatbot-frontend](https://github.com/JadenSulaiman/chatbot-frontend) * **Backend Repository:** [https://github.com/JadenSulaiman/chatbot-backend](https://github.com/JadenSulaiman/chatbot-backend) ---
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Frontend
+* **Framework:** Next.js
+* **Language:** TypeScript
+* **State Management:** React Hooks (`useState`, `useEffect`)
+* **Styling:** Tailwind CSS
+* **Deployment:** Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Backend
+* **Runtime:** Node.js
+* **Framework:** Express.js
+* **AI:** Google Generative AI (Gemini Pro)
+* **Deployment:** Railway
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* **Interactive AI Conversation:** Leverages the Google Gemini model to provide dynamic, context-aware responses.
+* **State Persistence:** Chat history is saved in `localStorage`, so conversations are not lost on page refresh.
+* **Responsive Design:** A clean, modern UI that works seamlessly on desktop and mobile devices.
+* **Live-Typing Indicators:** Enhances user experience by showing when the bot is processing a response.
 
-Final update
+---
+
+## How to Run Locally
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+* Node.js (v18 or later)
+* npm
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/JadenSulaiman/chatbot-frontend.git](https://github.com/JadenSulaiman/chatbot-frontend.git)
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd chatbot-frontend
+    ```
+3.  Install NPM packages:
+    ```bash
+    npm install
+    ```
+4.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+5.  Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
