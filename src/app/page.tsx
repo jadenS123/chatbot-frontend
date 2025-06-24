@@ -20,29 +20,65 @@ const GREETING_MESSAGE: Message = {
   sender: 'bot'
 };
 
-// This function takes a string of text and returns React elements.
-// It finds any URLs and replaces them with clickable links.
+// --- UPGRADED HELPER FUNCTION ---
+// This function can now handle both raw URLs and Markdown-style links [Text](URL)
 const renderMessageWithLinks = (text: string) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
+  // Regex to find Markdown links OR raw URLs
+  const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s]+)\)|(https?:\/\/[^\s]+)/g;
 
-  return parts.map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
+  // Split the text by our combined regex
+  const parts = text.split(linkRegex);
+
+  const elements: (string | JSX.Element)[] = [];
+  let i = 0;
+  while (i < parts.length) {
+    // Regular text part
+    if (parts[i]) {
+      elements.push(parts[i]);
+    }
+
+    // This part is the captured link text from Markdown, e.g., "My LinkedIn Profile"
+    const linkText = parts[i + 1];
+    // This part is the captured URL from Markdown
+    const markdownUrl = parts[i + 2];
+    // This part is a captured raw URL
+    const rawUrl = parts[i + 3];
+
+    if (markdownUrl) {
+      // It's a Markdown-style link
+      elements.push(
         <a
-          key={index}
-          href={part}
-          target="_blank" // Opens the link in a new tab
-          rel="noopener noreferrer" // Important for security
+          key={i}
+          href={markdownUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 font-semibold hover:underline"
+        >
+          {linkText}
+        </a>
+      );
+    } else if (rawUrl) {
+      // It's a raw URL (like a Google Drive link for a resume)
+      elements.push(
+        <a
+          key={i}
+          href={rawUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-blue-600 font-semibold hover:underline"
         >
           Click here to view/download
         </a>
       );
     }
-    return part;
-  });
+    // We increment by 4 because our regex has 3 capturing groups
+    i += 4;
+  }
+
+  return elements;
 };
+// --- END UPGRADED HELPER FUNCTION ---
+
 
 export default function Home() {
   const [input, setInput] = useState('');
@@ -197,8 +233,6 @@ export default function Home() {
               )}
               <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
                 
-                {/* --- MODIFIED LINE --- */}
-                {/* Instead of rendering message.text directly, we pass it to our new function */}
                 <p className="text-sm">{renderMessageWithLinks(message.text)}</p>
 
               </div>
