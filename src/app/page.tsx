@@ -65,6 +65,17 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+
+  // --- NEW ---
+  // This function resets the chat to its initial state.
+  const handleRestart = () => {
+    setMessages([GREETING_MESSAGE]);
+    setConversationStage('greeting');
+    setInput(''); // Also clear the input field
+  };
+  // --- END NEW ---
+
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -155,6 +166,20 @@ export default function Home() {
               <p className="text-sm text-gray-500">Online</p>
             </div>
           </div>
+          
+          {/* --- NEW --- */}
+          {/* Restart button with an SVG icon */}
+          <button 
+            onClick={handleRestart} 
+            className="ml-auto p-2 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            aria-label="Restart conversation"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+          {/* --- END NEW --- */}
+
         </div>
 
         <div className="flex-grow p-4 overflow-y-auto">
