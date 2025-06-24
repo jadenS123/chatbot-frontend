@@ -12,7 +12,7 @@ This project was built to demonstrate proficiency in full-stack development, mod
 
 This is a full-stack project built with a separate frontend and backend.
 
-* **Frontend Repository (You are here):** [https://github.com/JadenSulaiman/chatbot-frontend](https://github.com/JadenSulaiman/chatbot-frontend) * **Backend Repository:** [https://github.com/JadenSulaiman/chatbot-backend](https://github.com/JadenSulaiman/chatbot-backend) ---
+* **Frontend Repository (You are here):** [https://github.com/jadenS123/chatbot-frontend](https://github.com/jadenS123/chatbot-frontend) * **Backend Repository:** [https://github.com/jadenS123/chatbot-backend](https://github.com/jadenS123/chatbot-backend) ---
 
 ## Tech Stack
 
@@ -53,7 +53,7 @@ To get a local copy up and running, follow these simple steps.
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/JadenSulaiman/chatbot-frontend.git](https://github.com/JadenSulaiman/chatbot-frontend.git)
+    git clone [https://github.com/jadenS123/chatbot-frontend](https://github.com/jadenS123/chatbot-frontend)
     ```
 2.  Navigate to the project directory:
     ```bash
