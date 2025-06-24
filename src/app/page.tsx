@@ -13,19 +13,51 @@ type Message = {
 // A type to define the current stage of the conversation
 type ConversationStage = 'greeting' | 'chatting';
 
+// We define the default greeting message as a constant
+const GREETING_MESSAGE: Message = {
+  id: 1,
+  text: "Hello and welcome! I’m Jaden’s AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
+  sender: 'bot'
+};
+
+
 export default function Home() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationStage, setConversationStage] = useState<ConversationStage>('greeting');
-  
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      // CORRECTED: Using curly apostrophes
-      text: "Hello and welcome! I’m Jaden’s AI assistant, here to help you learn about him. To make our conversation a bit more personal, could you please tell me your name?",
-      sender: 'bot'
+
+  // --- START: PERSISTENCE LOGIC ---
+
+  // 1. LOAD conversationStage from localStorage on initial render
+  const [conversationStage, setConversationStage] = useState<ConversationStage>(() => {
+    if (typeof window !== 'undefined') {
+      const savedStage = localStorage.getItem('conversation_stage') as ConversationStage | null;
+      return savedStage || 'greeting';
     }
-  ]);
+    return 'greeting';
+  });
+
+  // 2. LOAD messages from localStorage on initial render
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedMessages = localStorage.getItem('chat_history');
+      // If messages are found, parse them. Otherwise, return the default greeting.
+      return savedMessages ? JSON.parse(savedMessages) : [GREETING_MESSAGE];
+    }
+    return [GREETING_MESSAGE];
+  });
+
+  // 3. SAVE conversationStage to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('conversation_stage', conversationStage);
+  }, [conversationStage]);
+
+  // 4. SAVE messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('chat_history', JSON.stringify(messages));
+  }, [messages]);
+
+  // --- END: PERSISTENCE LOGIC ---
+
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -58,12 +90,11 @@ export default function Home() {
           sender: 'bot',
         };
         setMessages(prevMessages => [...prevMessages, followupMessage]);
-        setConversationStage('chatting'); 
+        setConversationStage('chatting');
       } else {
         const visitorName = currentInput;
         const welcomeReply: Message = {
           id: Date.now() + 1,
-          // CORRECTED: Using curly apostrophes
           text: `It’s great to meet you, ${visitorName}! What would you like to know about Jaden?`,
           sender: 'bot',
         };
@@ -99,7 +130,6 @@ export default function Home() {
         console.error("Failed to fetch response:", error);
         const errorMessage: Message = {
           id: Date.now() + 1,
-          // CORRECTED: Using curly apostrophes
           text: "Sorry, I’m having trouble connecting. Please try again.",
           sender: 'bot',
         };
@@ -119,7 +149,6 @@ export default function Home() {
             <Image src="/Headshot.jpg" alt="Chatbot headshot" width={48} height={48} className="object-cover w-full h-full" />
           </div>
           <div className="flex-grow">
-            {/* CORRECTED: Using curly apostrophes */}
             <h2 className="font-bold text-lg text-gray-800">Jaden’s AI Assistant</h2>
             <div className="flex items-center space-x-2">
               <span className="h-2.5 w-2.5 bg-green-500 rounded-full animate-pulse"></span>
