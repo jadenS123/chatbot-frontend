@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import type { JSX } from 'react';
+
 
 // This defines the structure for a single message object
 type Message = {
