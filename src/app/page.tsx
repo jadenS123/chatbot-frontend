@@ -22,94 +22,46 @@ const GREETING_MESSAGE: Message = {
   sender: 'bot'
 };
 
-// --- UPGRADED HELPER FUNCTION ---
-// This function can now handle both raw URLs and Markdown-style links [Text](URL)
+// Helper function to render links in messages
 const renderMessageWithLinks = (text: string) => {
-  // Regex to find Markdown links OR raw URLs
   const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s]+)\)|(https?:\/\/[^\s]+)/g;
-
-  // Split the text by our combined regex
   const parts = text.split(linkRegex);
-
   const elements: (string | JSX.Element)[] = [];
   let i = 0;
   while (i < parts.length) {
-    // Regular text part
     if (parts[i]) {
       elements.push(parts[i]);
     }
-
-    // This part is the captured link text from Markdown, e.g., "My LinkedIn Profile"
     const linkText = parts[i + 1];
-    // This part is the captured URL from Markdown
     const markdownUrl = parts[i + 2];
-    // This part is a captured raw URL
     const rawUrl = parts[i + 3];
 
     if (markdownUrl) {
-      // It's a Markdown-style link
       elements.push(
-        <a
-          key={i}
-          href={markdownUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 font-semibold hover:underline"
-        >
+        <a key={i} href={markdownUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold hover:underline">
           {linkText}
         </a>
       );
     } else if (rawUrl) {
-      // It's a raw URL (like a Google Drive link for a resume)
       elements.push(
-        <a
-          key={i}
-          href={rawUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 font-semibold hover:underline"
-        >
+        <a key={i} href={rawUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold hover:underline">
           Click here to view/download
         </a>
       );
     }
-    // We increment by 4 because our regex has 3 capturing groups
     i += 4;
   }
-
   return elements;
 };
-// --- END UPGRADED HELPER FUNCTION ---
 
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const [conversationStage, setConversationStage] = useState<ConversationStage>(() => {
-    if (typeof window !== 'undefined') {
-      const savedStage = localStorage.getItem('conversation_stage') as ConversationStage | null;
-      return savedStage || 'greeting';
-    }
-    return 'greeting';
-  });
-
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window !== 'undefined') {
-      const savedMessages = localStorage.getItem('chat_history');
-      return savedMessages ? JSON.parse(savedMessages) : [GREETING_MESSAGE];
-    }
-    return [GREETING_MESSAGE];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('conversation_stage', conversationStage);
-  }, [conversationStage]);
-
-  useEffect(() => {
-    localStorage.setItem('chat_history', JSON.stringify(messages));
-  }, [messages]);
-
+  const [conversationStage, setConversationStage] = useState<ConversationStage>('greeting');
+  const [messages, setMessages] = useState<Message[]>([GREETING_MESSAGE]);
+  
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
@@ -131,8 +83,10 @@ export default function Home() {
       text: input,
       sender: 'user',
     };
-
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    
+    // Add user message to state immediately for a responsive UI
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     const currentInput = input;
     setInput('');
 
@@ -140,38 +94,44 @@ export default function Home() {
       const refusalKeywords = ['no', 'nah', 'skip', 'n/a', 'anon', 'anonymous', 'i prefer not to say', 'i\'d rather not'];
       const isRefusal = refusalKeywords.includes(currentInput.trim().toLowerCase());
 
+      let botReplyText = '';
       if (isRefusal) {
-        const followupMessage: Message = {
-          id: Date.now() + 1,
-          text: "Okay, no problem. What would you like to know about Jaden?",
-          sender: 'bot',
-        };
-        setMessages(prevMessages => [...prevMessages, followupMessage]);
-        setConversationStage('chatting');
+        botReplyText = "Okay, no problem. What can I tell you about my work and experience?";
       } else {
         const visitorName = currentInput;
-        const welcomeReply: Message = {
-          id: Date.now() + 1,
-          text: `It’s great to meet you, ${visitorName}! What would you like to know about Jaden?`,
-          sender: 'bot',
-        };
-        setMessages(prevMessages => [...prevMessages, welcomeReply]);
-        setConversationStage('chatting');
+        botReplyText = `It’s great to meet you, ${visitorName}! What would you like to know about me?`;
       }
+
+      const followupMessage: Message = {
+        id: Date.now() + 1,
+        text: botReplyText,
+        sender: 'bot',
+      };
+      setMessages(prevMessages => [...prevMessages, followupMessage]);
+      setConversationStage('chatting');
 
     } else { // 'chatting' stage
       setIsLoading(true);
 
-      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      // --- START: CRITICAL CHANGE FOR CONVERSATION HISTORY ---
+      // Prepare the history for the backend API.
+      // The backend expects a specific format: { role: 'user'|'model', parts: [{ text: '...' }] }
+      const apiHistory = updatedMessages.slice(0, -1).map(msg => ({ // Exclude the user's latest message
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }],
+      }));
+      // --- END: CRITICAL CHANGE ---
 
       try {
-        const fetchPromise = fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
+        const response = await fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: currentInput }),
+          // Send both the new message AND the history
+          body: JSON.stringify({ 
+            history: apiHistory, 
+            message: currentInput 
+          }),
         });
-
-        const [response] = await Promise.all([fetchPromise, delay(1000)]);
 
         if (!response.ok) { throw new Error('Network response was not ok'); }
 
@@ -234,9 +194,7 @@ export default function Home() {
                 </div>
               )}
               <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                
                 <p className="text-sm">{renderMessageWithLinks(message.text)}</p>
-
               </div>
             </div>
           ))}
