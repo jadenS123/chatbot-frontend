@@ -84,7 +84,6 @@ export default function Home() {
       sender: 'user',
     };
     
-    // Add user message to state immediately for a responsive UI
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     const currentInput = input;
@@ -95,6 +94,7 @@ export default function Home() {
       const isRefusal = refusalKeywords.includes(currentInput.trim().toLowerCase());
 
       let botReplyText = '';
+      // *** FIX: Changed hardcoded third-person text to first-person ***
       if (isRefusal) {
         botReplyText = "Okay, no problem. What can I tell you about my work and experience?";
       } else {
@@ -113,20 +113,15 @@ export default function Home() {
     } else { // 'chatting' stage
       setIsLoading(true);
 
-      // --- START: CRITICAL CHANGE FOR CONVERSATION HISTORY ---
-      // Prepare the history for the backend API.
-      // The backend expects a specific format: { role: 'user'|'model', parts: [{ text: '...' }] }
-      const apiHistory = updatedMessages.slice(0, -1).map(msg => ({ // Exclude the user's latest message
+      const apiHistory = updatedMessages.slice(0, -1).map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }],
       }));
-      // --- END: CRITICAL CHANGE ---
 
       try {
         const response = await fetch('https://chatbot-backend-production-cbeb.up.railway.app/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          // Send both the new message AND the history
           body: JSON.stringify({ 
             history: apiHistory, 
             message: currentInput 
@@ -166,6 +161,7 @@ export default function Home() {
             <Image src="/Headshot.jpg" alt="Chatbot headshot" width={48} height={48} className="object-cover w-full h-full" />
           </div>
           <div className="flex-grow">
+            {/* This title is for the user interface, it's okay for it to be descriptive */}
             <h2 className="font-bold text-lg text-gray-800">Jaden’s AI Assistant</h2>
             <div className="flex items-center space-x-2">
               <span className="h-2.5 w-2.5 bg-green-500 rounded-full animate-pulse"></span>
